@@ -49,6 +49,8 @@
 #   Allow destructive operations without prompting for confirmation.
 # * OK_SH_MARKDOWN=${OK_SH_MARKDOWN}
 #   Output some text in Markdown format.
+# * OK_SH_NETRC_FILE=${OK_SH_NETRC_FILE:-null}
+#   Allow setting a custom .netrc file.
 
 export NAME=$(basename "$0")
 export VERSION='0.1.0'
@@ -60,6 +62,7 @@ export OK_SH_VERBOSE="${OK_SH_VERBOSE:-0}"
 export OK_SH_RATE_LIMIT="${OK_SH_RATE_LIMIT:-0}"
 export OK_SH_DESTRUCTIVE="${OK_SH_DESTRUCTIVE:-0}"
 export OK_SH_MARKDOWN="${OK_SH_MARKDOWN:-0}"
+export OK_SH_NETRC_FILE="${OK_SH_NETRC_FILE:-}"
 
 # Detect if jq is installed.
 command -v "$OK_SH_JQ_BIN" 1>/dev/null 2>/dev/null
@@ -79,6 +82,9 @@ awk_bin=$(command -v awk)
 # Generate a carriage return so we can match on it.
 # Using a variable because these are tough to specify in a portable way.
 cr=$(printf '\r')
+
+# We need to set curl_param_netrc if $OK_SH_NETRC_FILE is not null
+[ -n "$OK_SH_NETRC_FILE" ] && curl_param_netrc="--netrc-file ${OK_SH_NETRC_FILE}"
 
 # ## Main
 # Generic functions not necessarily specific to working with GitHub.
@@ -680,7 +686,7 @@ _request() {
 
     [ "$OK_SH_VERBOSE" -eq 1 ] && set -x
     # shellcheck disable=SC2086
-    curl -nsSig \
+    curl ${curl_param_netrc:-'-n'} -sSig \
         -H "Accept: ${OK_SH_ACCEPT}" \
         -H "Content-Type: ${content_type}" \
         ${etag:+-H "If-None-Match: \"${etag}\""} \
@@ -1215,7 +1221,7 @@ list_contributors() {
     #     list_contributors user repo
     #
     # Positional arguments
-    #   
+    #
     local user="${1:?User name required.}"
     #   GitHub user login or id for which to list contributors
     local repo="${2:?Repo name required.}"
@@ -1270,7 +1276,7 @@ list_collaborators() {
     # * `per_page`
     # * `sort`
     # * `type`
- 
+
     shift 1
 
     local qs
