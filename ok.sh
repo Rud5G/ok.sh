@@ -63,7 +63,7 @@ export OK_SH_VERBOSE="${OK_SH_VERBOSE:-0}"
 export OK_SH_RATE_LIMIT="${OK_SH_RATE_LIMIT:-0}"
 export OK_SH_DESTRUCTIVE="${OK_SH_DESTRUCTIVE:-0}"
 export OK_SH_MARKDOWN="${OK_SH_MARKDOWN:-0}"
-export OK_SH_NETRC_FILE=${OK_SH_NETRC_FILE:-null}
+export OK_SH_NETRC_FILE="${OK_SH_NETRC_FILE:-}"
 
 # Detect if jq is installed.
 command -v "$OK_SH_JQ_BIN" 1>/dev/null 2>/dev/null
@@ -77,16 +77,15 @@ export LINFO=4      # Info-level log messages.
 export LDEBUG=5     # Debug-level log messages.
 export LSUMMARY=6   # Summary output.
 
-
-# We need to set OK_CURL_PARAM_NETRC if $OK_SH_NETRC_FILE is not null
-[ OK_SH_NETRC_FILE -ne null ] && export OK_CURL_PARAM_NETRC="--netrc-file ${OK_SH_NETRC_FILE}"
-
 # We need this path for when we reset our env.
 awk_bin=$(command -v awk)
 
 # Generate a carriage return so we can match on it.
 # Using a variable because these are tough to specify in a portable way.
 cr=$(printf '\r')
+
+# We need to set curl_param_netrc if $OK_SH_NETRC_FILE is not null
+[ -n "$OK_SH_NETRC_FILE" ] && curl_param_netrc="--netrc-file ${OK_SH_NETRC_FILE}"
 
 # ## Main
 # Generic functions not necessarily specific to working with GitHub.
@@ -688,7 +687,7 @@ _request() {
 
     [ "$OK_SH_VERBOSE" -eq 1 ] && set -x
     # shellcheck disable=SC2086
-    curl ${OK_CURL_PARAM_NETRC:-'-n'} -sSig \
+    curl ${curl_param_netrc:-'-n'} -sSig \
         -H "Accept: ${OK_SH_ACCEPT}" \
         -H "Content-Type: ${content_type}" \
         ${etag:+-H "If-None-Match: \"${etag}\""} \
