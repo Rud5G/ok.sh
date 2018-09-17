@@ -60,6 +60,7 @@ export OK_SH_VERBOSE="${OK_SH_VERBOSE:-0}"
 export OK_SH_RATE_LIMIT="${OK_SH_RATE_LIMIT:-0}"
 export OK_SH_DESTRUCTIVE="${OK_SH_DESTRUCTIVE:-0}"
 export OK_SH_MARKDOWN="${OK_SH_MARKDOWN:-0}"
+export OK_SH_CURL_NETRC="${OK_SH_CURL_NETRC:-'-n'}"
 
 # Detect if jq is installed.
 command -v "$OK_SH_JQ_BIN" 1>/dev/null 2>/dev/null
@@ -680,7 +681,7 @@ _request() {
 
     [ "$OK_SH_VERBOSE" -eq 1 ] && set -x
     # shellcheck disable=SC2086
-    curl -nsSig \
+    curl ${OK_SH_CURL_NETRC} -sSig \
         -H "Accept: ${OK_SH_ACCEPT}" \
         -H "Content-Type: ${content_type}" \
         ${etag:+-H "If-None-Match: \"${etag}\""} \
@@ -1215,7 +1216,7 @@ list_contributors() {
     #     list_contributors user repo
     #
     # Positional arguments
-    #   
+    #
     local user="${1:?User name required.}"
     #   GitHub user login or id for which to list contributors
     local repo="${2:?Repo name required.}"
@@ -1270,7 +1271,7 @@ list_collaborators() {
     # * `per_page`
     # * `sort`
     # * `type`
- 
+
     shift 1
 
     local qs
