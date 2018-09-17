@@ -53,6 +53,8 @@ The following environment variables may be set to customize ok.sh.
   Allow destructive operations without prompting for confirmation.
 * OK_SH_MARKDOWN=1
   Output some text in Markdown format.
+* OK_SH_NETRC_FILE=null
+  Allow setting a custom .netrc file.
 
 ## Usage
 
@@ -673,7 +675,7 @@ Usage:
     list_contributors user repo
 
 Positional arguments
-  
+
 * `user="$1"`
 
   GitHub user login or id for which to list contributors

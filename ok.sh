@@ -49,6 +49,9 @@
 #   Allow destructive operations without prompting for confirmation.
 # * OK_SH_MARKDOWN=${OK_SH_MARKDOWN}
 #   Output some text in Markdown format.
+# * OK_SH_NETRC_FILE=${OK_SH_NETRC_FILE:-null}
+#   Allow setting a custom .netrc file.
+
 
 export NAME=$(basename "$0")
 export VERSION='0.1.0'
@@ -60,7 +63,7 @@ export OK_SH_VERBOSE="${OK_SH_VERBOSE:-0}"
 export OK_SH_RATE_LIMIT="${OK_SH_RATE_LIMIT:-0}"
 export OK_SH_DESTRUCTIVE="${OK_SH_DESTRUCTIVE:-0}"
 export OK_SH_MARKDOWN="${OK_SH_MARKDOWN:-0}"
-export OK_SH_CURL_NETRC="${OK_SH_CURL_NETRC:-'-n'}"
+export OK_SH_NETRC_FILE=${OK_SH_NETRC_FILE:-null}
 
 # Detect if jq is installed.
 command -v "$OK_SH_JQ_BIN" 1>/dev/null 2>/dev/null
@@ -73,6 +76,10 @@ exec 6>/dev/null
 export LINFO=4      # Info-level log messages.
 export LDEBUG=5     # Debug-level log messages.
 export LSUMMARY=6   # Summary output.
+
+
+# We need to set OK_CURL_PARAM_NETRC if $OK_SH_NETRC_FILE is not null
+[ OK_SH_NETRC_FILE -ne null ] && export OK_CURL_PARAM_NETRC="--netrc-file ${OK_SH_NETRC_FILE}"
 
 # We need this path for when we reset our env.
 awk_bin=$(command -v awk)
@@ -681,7 +688,7 @@ _request() {
 
     [ "$OK_SH_VERBOSE" -eq 1 ] && set -x
     # shellcheck disable=SC2086
-    curl ${OK_SH_CURL_NETRC} -sSig \
+    curl ${OK_CURL_PARAM_NETRC:-'-n'} -sSig \
         -H "Accept: ${OK_SH_ACCEPT}" \
         -H "Content-Type: ${content_type}" \
         ${etag:+-H "If-None-Match: \"${etag}\""} \
