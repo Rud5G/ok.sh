@@ -8,7 +8,7 @@ install : $(PROGRAM)
 	cp $(PROGRAM) "$(DESTDIR)/bin/"
 	chmod 755 "$(DESTDIR)/bin/$(PROGRAM)"
 	cp $(PROGRAM) "$(DESTDIRB)bin/"
-	chmod 777 "$(DESTDIRB)bin/$(PROGRAM)"
+	chmod 755 "$(DESTDIRB)bin/$(PROGRAM)"
 
 test:
 	make -C tests all
