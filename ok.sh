@@ -687,7 +687,7 @@ _request() {
 
     [ "$OK_SH_VERBOSE" -eq 1 ] && set -x
     # shellcheck disable=SC2086
-    curl ${curl_param_netrc:-'-n'} -sSig \
+    curl ${curl_param_netrc:-'-n'} ${curl_param_include:-'-i'} -sSg \
         -H "Accept: ${OK_SH_ACCEPT}" \
         -H "Content-Type: ${content_type}" \
         ${etag:+-H "If-None-Match: \"${etag}\""} \
@@ -752,9 +752,9 @@ _response() {
 
     _log debug 'Processing response.'
 
-    read -r http_version status_code status_text
-    status_text="${status_text%${cr}}"
-    http_version="${http_version#HTTP/}"
+    read -r http_versionr status_code status_textr
+    status_text="${status_textr%${cr}}"
+    http_version="${http_versionr#HTTP/}"
 
     _log debug "Response status is: ${status_code} ${status_text}"
 
@@ -762,10 +762,10 @@ _response() {
 status_code: ${status_code}
 status_text: ${status_text}
 "
-    while IFS=": " read -r hdr val; do
+    while IFS=": " read -r hdr valr; do
         # Headers stop at the first blank line.
         [ "$hdr" = "$cr" ] && break
-        val="${val%${cr}}"
+        val="${valr%${cr}}"
 
         # Process each header; reformat some to work better with sh tools.
         case "$hdr" in
@@ -1649,6 +1649,9 @@ upload_asset() {
         printf 'upload_asset requires jq\n' 1>&2
         exit 1
     fi
+    # fix issue with upload asset header output in JQ
+    curl_param_include=''
+
 
     _opts_filter "$@"
 
